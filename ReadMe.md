@@ -1,5 +1,5 @@
 ```
-https://github.com/mariusjt/webhooksq1
+git clone https://github.com/mariusjt/webhooksq1
 ```
 
 # Oppgave
