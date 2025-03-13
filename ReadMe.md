@@ -1,4 +1,5 @@
 ```
+winget install Microsoft.DotNet.SDK.9
 git clone https://github.com/mariusjt/webhooksq1
 ```
 
