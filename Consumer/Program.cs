@@ -26,9 +26,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapPost("/event", ([FromServices]EventHandler eventHandler, [FromBody]Event @event) =>
+app.MapPost("/event", async ([FromServices]EventHandler eventHandler, [FromBody]Event @event) =>
 {
-    eventHandler.HandleEvent(@event);
+    await Task.Delay(5000);
+    await eventHandler.HandleEvent(@event);
 });
 app.MapGet("/users", (UserStore userStore) => userStore.GetUsers());
 

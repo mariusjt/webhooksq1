@@ -2,7 +2,6 @@ using Events;
 using Microsoft.AspNetCore.Mvc;
 using Provider;
 using Scalar.AspNetCore;
-using EventHandler = Provider.EventHandler;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +11,8 @@ builder.Services.AddOpenApi();
 builder.Services.AddSingleton<UserStore>();
 builder.Services.AddSingleton<SubscriberStore>();
 builder.Services.AddHttpClient<Provider.EventHandler>();
+builder.Services.AddSingleton<EventBus>();
+builder.Services.AddSingleton<EventListener>();
 
 var app = builder.Build();
 
@@ -25,10 +26,10 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.MapGet("/users", (UserStore userStore) => userStore.GetUsers());
-app.MapPost("/users", async (UserStore userStore, EventHandler eventHandler, [FromBody] User user) =>
+app.MapPost("/users", (UserStore userStore, EventBus eventBus, [FromBody] User user) =>
 {
     var newUser = userStore.CreateUser(user);
-    await eventHandler.HandleEvent(new UserCreated(newUser.Id, newUser.Name));
+    eventBus.AddEvent(new UserCreated(newUser.Id, newUser.Name));
 });
 app.MapGet("/users/{id}", (UserStore userStore, int id) => userStore.GetUserById(id));
 app.MapPut("/users", (UserStore userStore, [FromBody]User user) => userStore.UpdateUser(user));
@@ -38,5 +39,8 @@ app.MapDelete("/users/{id}", (UserStore userStore, int id) => userStore.DeleteUs
 
 
 app.MapGet("/health", () => "OK").WithName("Health");
+
+
+app.Services.GetRequiredService<EventListener>().DoWork();
 
 app.Run();
